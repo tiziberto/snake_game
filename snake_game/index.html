@@ -59,8 +59,22 @@
     </div>
     <div id="leaderboardPanel" class="panel hidden">
       <h2>Leaderboard</h2>
-      <p>Coming soon...</p>
-      <button id="closeLeaderboardBtn">Close</button>
+      <table id="leaderboardTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Score</th>
+            <th>Time</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboardBody"></tbody>
+      </table>
+      <div class="leaderboard-actions">
+        <button id="clearLeaderboardBtn">Clear Leaderboard</button>
+        <button id="closeLeaderboardBtn">Close</button>
+      </div>
     </div>
   </div>
   <script src="game.js"></script>

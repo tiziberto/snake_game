@@ -16,6 +16,8 @@ const finalTime = document.getElementById('finalTime');
 const playAgainBtn = document.getElementById('playAgainBtn');
 const saveScoreBtn = document.getElementById('saveScoreBtn');
 const closeGameOverBtn = document.getElementById('closeGameOverBtn');
+const leaderboardBody = document.getElementById('leaderboardBody');
+const clearLeaderboardBtn = document.getElementById('clearLeaderboardBtn');
 
 const gridSizeSelect = document.getElementById('gridSize');
 const speedSelect = document.getElementById('speed');
@@ -275,6 +277,43 @@ playAgainBtn.addEventListener('click', () => {
   startGame();
 });
 
+function getLeaderboard() {
+  return JSON.parse(sessionStorage.getItem('snakeLeaderboard') || '[]');
+}
+
+function renderLeaderboard() {
+  const scores = getLeaderboard();
+  leaderboardBody.innerHTML = '';
+  if (scores.length === 0) {
+    leaderboardBody.innerHTML = '<tr><td colspan="5">No scores yet</td></tr>';
+    return;
+  }
+  scores.forEach((entry, index) => {
+    const row = document.createElement('tr');
+    const date = new Date(entry.date).toLocaleString();
+    row.innerHTML = `
+      <td>${index + 1}</td>
+      <td>${entry.name}</td>
+      <td>${entry.score}</td>
+      <td>${entry.time}</td>
+      <td>${date}</td>
+    `;
+    leaderboardBody.appendChild(row);
+  });
+}
+
+leaderboardBtn.addEventListener('click', () => {
+  renderLeaderboard();
+  leaderboardPanel.classList.remove('hidden');
+});
+
+clearLeaderboardBtn.addEventListener('click', () => {
+  if (confirm('Are you sure you want to clear the leaderboard?')) {
+    sessionStorage.removeItem('snakeLeaderboard');
+    renderLeaderboard();
+  }
+});
+
 saveScoreBtn.addEventListener('click', () => {
   const name = prompt('Enter your name:');
   if (!name) return;
@@ -284,7 +323,7 @@ saveScoreBtn.addEventListener('click', () => {
     time: formatTime(elapsedSeconds),
     date: new Date().toISOString()
   };
-  let scores = JSON.parse(sessionStorage.getItem('snakeLeaderboard') || '[]');
+  let scores = getLeaderboard();
   scores.push(entry);
   scores.sort((a, b) => b.score - a.score);
   scores = scores.slice(0, 10);

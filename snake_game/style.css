@@ -42,6 +42,39 @@ h1 {
   margin-bottom: 8px;
 }
 
+#leaderboardTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+
+#leaderboardTable th,
+#leaderboardTable td {
+  padding: 6px 8px;
+  text-align: left;
+  border-bottom: 1px solid #555;
+  font-size: 0.9rem;
+}
+
+#leaderboardTable th {
+  background-color: #444;
+}
+
+.leaderboard-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+#clearLeaderboardBtn {
+  background-color: #f44336;
+}
+
+#clearLeaderboardBtn:hover {
+  background-color: #e53935;
+}
+
 canvas {
   border: 2px solid #555;
   background-color: #222;
