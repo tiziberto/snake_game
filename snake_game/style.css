@@ -26,6 +26,20 @@ h1 {
 .score-area {
   font-size: 1.2rem;
   margin-bottom: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+}
+
+.game-over-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.panel p {
+  margin-bottom: 8px;
 }
 
 canvas {

@@ -9,12 +9,25 @@
 <body>
   <div class="container">
     <h1>Snake Game 🐍</h1>
-    <div class="score-area" id="scoreArea">Score: 0</div>
+    <div class="score-area">
+      <span id="scoreDisplay">Score: 0</span>
+      <span id="timerDisplay">Time: 00:00</span>
+    </div>
     <canvas id="gameCanvas" width="400" height="400"></canvas>
     <div class="controls">
       <button id="startBtn">Start Game</button>
       <button id="settingsBtn">Settings</button>
       <button id="leaderboardBtn">Leaderboard</button>
+    </div>
+    <div id="gameOverPanel" class="panel hidden">
+      <h2>Game Over</h2>
+      <p>Final Score: <span id="finalScore">0</span></p>
+      <p>Time Played: <span id="finalTime">00:00</span></p>
+      <div class="game-over-actions">
+        <button id="saveScoreBtn">Save Score</button>
+        <button id="playAgainBtn">Play Again</button>
+      </div>
+      <button id="closeGameOverBtn">Close</button>
     </div>
     <div id="settingsPanel" class="panel hidden">
       <h2>Settings</h2>
