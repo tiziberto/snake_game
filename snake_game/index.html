@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snake Game 🐍</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Snake Game 🐍</h1>
+    <div class="score-area" id="scoreArea">Score: 0</div>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <div class="controls">
+      <button id="startBtn">Start Game</button>
+      <button id="settingsBtn">Settings</button>
+      <button id="leaderboardBtn">Leaderboard</button>
+    </div>
+    <div id="settingsPanel" class="panel hidden">
+      <h2>Settings</h2>
+      <div class="setting">
+        <label for="snakeColor">Snake Color</label>
+        <input type="color" id="snakeColor" value="#4CAF50">
+      </div>
+      <div class="setting">
+        <label for="bgColor">Background Color</label>
+        <input type="color" id="bgColor" value="#222222">
+      </div>
+      <div class="setting">
+        <label for="gridSize">Grid Size</label>
+        <select id="gridSize">
+          <option value="15">15 x 15</option>
+          <option value="20" selected>20 x 20</option>
+          <option value="30">30 x 30</option>
+        </select>
+      </div>
+      <div class="setting">
+        <label for="speed">Speed</label>
+        <select id="speed">
+          <option value="slow">Slow</option>
+          <option value="normal" selected>Normal</option>
+          <option value="fast">Fast</option>
+        </select>
+      </div>
+      <button id="closeSettingsBtn">Close</button>
+    </div>
+    <div id="leaderboardPanel" class="panel hidden">
+      <h2>Leaderboard</h2>
+      <p>Coming soon...</p>
+      <button id="closeLeaderboardBtn">Close</button>
+    </div>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>
