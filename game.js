@@ -116,6 +116,10 @@ function gameOver() {
   gameRunning = false;
   if (gameLoopId) cancelAnimationFrame(gameLoopId);
   if (timerIntervalId) clearInterval(timerIntervalId);
+  snake = [];
+  apple = {};
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
   finalScore.textContent = score;
   finalTime.textContent = formatTime(elapsedSeconds);
   startBtn.textContent = 'Start Game';
