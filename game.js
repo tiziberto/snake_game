@@ -177,12 +177,15 @@ function initGame() {
   store.setState('snake', initialSnake);
   store.setState('apple', generateApple(initialSnake));
   timerDisplay.textContent = `Time: ${formatTime(0)}`;
+  renderFull();
 }
 
 function triggerGameOver() {
   gameRunning = false;
   if (gameLoopId) cancelAnimationFrame(gameLoopId);
   if (timerIntervalId) clearInterval(timerIntervalId);
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
   finalScore.textContent = store.getState().score;
   finalTime.textContent = formatTime(elapsedSeconds);
   store.setState('gameStatus', 'gameover');
