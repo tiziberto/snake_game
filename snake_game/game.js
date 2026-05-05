@@ -8,6 +8,7 @@ const settingsPanel = document.getElementById('settingsPanel');
 const leaderboardPanel = document.getElementById('leaderboardPanel');
 const closeSettingsBtn = document.getElementById('closeSettingsBtn');
 const closeLeaderboardBtn = document.getElementById('closeLeaderboardBtn');
+const scoreArea = document.getElementById('scoreArea');
 
 const gridSizeSelect = document.getElementById('gridSize');
 const speedSelect = document.getElementById('speed');
@@ -20,30 +21,41 @@ let speed = 'normal';
 let snakeColor = '#4CAF50';
 let bgColor = '#222222';
 
-let snake = [];
-let direction = { x: 1, y: 0 };
-let nextDirection = { x: 1, y: 0 };
-let gameRunning = false;
-let lastMoveTime = 0;
-let gameLoopId = null;
-
 const speedMap = { slow: 200, normal: 120, fast: 60 };
 
 function getInterval() {
   return speedMap[speed] || 120;
 }
 
-function initSnake() {
-  const centerX = Math.floor(gridSize / 2);
-  const centerY = Math.floor(gridSize / 2);
-  snake = [
-    { x: centerX, y: centerY },
-    { x: centerX - 1, y: centerY },
-    { x: centerX - 2, y: centerY }
-  ];
-  direction = { x: 1, y: 0 };
-  nextDirection = { x: 1, y: 0 };
+function createReactiveStore(initialState) {
+  const state = { ...initialState };
+  const listeners = {};
+
+  function subscribe(key, callback) {
+    if (!listeners[key]) listeners[key] = [];
+    listeners[key].push(callback);
+  }
+
+  function setState(key, value) {
+    const previous = state[key];
+    state[key] = value;
+    if (listeners[key]) {
+      listeners[key].forEach(cb => cb(value, previous));
+    }
+  }
+
+  function getState() {
+    return { ...state };
+  }
+
+  return { subscribe, setState, getState };
 }
+
+const store = createReactiveStore({
+  snake: [],
+  direction: { x: 1, y: 0 },
+  gameStatus: 'idle'
+});
 
 function drawCell(x, y, color) {
   ctx.fillStyle = color;
@@ -52,36 +64,58 @@ function drawCell(x, y, color) {
   ctx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
 }
 
-function render() {
+function clearCell(x, y) {
   ctx.fillStyle = bgColor;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  for (const segment of snake) {
-    drawCell(segment.x, segment.y, snakeColor);
-  }
+  ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
 }
 
-function update(timestamp) {
-  if (!gameRunning) return;
-
-  gameLoopId = requestAnimationFrame(update);
-
-  if (timestamp - lastMoveTime < getInterval()) return;
-  lastMoveTime = timestamp;
-
-  direction = { ...nextDirection };
-
-  const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
-
-  if (head.x < 0 || head.x >= gridSize || head.y < 0 || head.y >= gridSize) {
-    gameOver();
-    return;
+store.subscribe('snake', (newSnake, oldSnake) => {
+  if (oldSnake && oldSnake.length > 0 && newSnake.length > 0) {
+    const oldTail = oldSnake[oldSnake.length - 1];
+    const isNewTailStillInSnake = newSnake.some(
+      seg => seg.x === oldTail.x && seg.y === oldTail.y
+    );
+    if (!isNewTailStillInSnake) {
+      clearCell(oldTail.x, oldTail.y);
+    }
+    const newHead = newSnake[0];
+    drawCell(newHead.x, newHead.y, snakeColor);
+  } else if (newSnake.length > 0) {
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    for (const segment of newSnake) {
+      drawCell(segment.x, segment.y, snakeColor);
+    }
   }
+});
 
-  snake.unshift(head);
-  snake.pop();
+store.subscribe('gameStatus', (status) => {
+  if (status === 'idle') {
+    startBtn.textContent = 'Start Game';
+  } else if (status === 'running') {
+    startBtn.textContent = 'Running...';
+  } else if (status === 'gameover') {
+    startBtn.textContent = 'Start Game';
+  }
+});
 
-  render();
+let gameRunning = false;
+let lastMoveTime = 0;
+let gameLoopId = null;
+let currentDirection = { x: 1, y: 0 };
+let nextDirection = { x: 1, y: 0 };
+
+function initSnake() {
+  const centerX = Math.floor(gridSize / 2);
+  const centerY = Math.floor(gridSize / 2);
+  const initialSnake = [
+    { x: centerX, y: centerY },
+    { x: centerX - 1, y: centerY },
+    { x: centerX - 2, y: centerY }
+  ];
+  currentDirection = { x: 1, y: 0 };
+  nextDirection = { x: 1, y: 0 };
+  store.setState('snake', initialSnake);
 }
 
 function gameOver() {
@@ -89,8 +123,31 @@ function gameOver() {
   if (gameLoopId) {
     cancelAnimationFrame(gameLoopId);
   }
-  startBtn.textContent = 'Start Game';
-  alert('Game Over! Hit the wall.');
+  store.setState('gameStatus', 'gameover');
+}
+
+function gameLoop(timestamp) {
+  if (!gameRunning) return;
+
+  gameLoopId = requestAnimationFrame(gameLoop);
+
+  if (timestamp - lastMoveTime < getInterval()) return;
+  lastMoveTime = timestamp;
+
+  currentDirection = { ...nextDirection };
+  const state = store.getState();
+  const snake = state.snake;
+
+  const head = { x: snake[0].x + currentDirection.x, y: snake[0].y + currentDirection.y };
+
+  if (head.x < 0 || head.x >= gridSize || head.y < 0 || head.y >= gridSize) {
+    gameOver();
+    return;
+  }
+
+  const newSnake = [head, ...snake.slice(0, -1)];
+  store.setState('snake', newSnake);
+  store.setState('direction', currentDirection);
 }
 
 function startGame() {
@@ -105,12 +162,11 @@ function startGame() {
   canvas.style.backgroundColor = bgColor;
 
   initSnake();
-  render();
+  store.setState('gameStatus', 'running');
 
   gameRunning = true;
-  startBtn.textContent = 'Running...';
   lastMoveTime = 0;
-  gameLoopId = requestAnimationFrame(update);
+  gameLoopId = requestAnimationFrame(gameLoop);
 }
 
 startBtn.addEventListener('click', () => {
@@ -141,16 +197,16 @@ document.addEventListener('keydown', (e) => {
 
   switch (key) {
     case 'w':
-      if (direction.y !== 1) nextDirection = { x: 0, y: -1 };
+      if (currentDirection.y !== 1) nextDirection = { x: 0, y: -1 };
       break;
     case 'a':
-      if (direction.x !== 1) nextDirection = { x: -1, y: 0 };
+      if (currentDirection.x !== 1) nextDirection = { x: -1, y: 0 };
       break;
     case 's':
-      if (direction.y !== -1) nextDirection = { x: 0, y: 1 };
+      if (currentDirection.y !== -1) nextDirection = { x: 0, y: 1 };
       break;
     case 'd':
-      if (direction.x !== -1) nextDirection = { x: 1, y: 0 };
+      if (currentDirection.x !== -1) nextDirection = { x: 1, y: 0 };
       break;
   }
 });
